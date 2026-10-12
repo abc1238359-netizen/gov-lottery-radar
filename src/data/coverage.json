@@ -1,0 +1,41 @@
+{
+  "lastRun": "2026-10-12",
+  "units": [
+    { "name": "財政部", "group": "central", "lastChecked": "2026-10-12", "found": 0, "note": "統一發票／雲端發票列為常態卡片。「雲端新世界 環保享便利」活動已於 9/30 結束。" },
+    { "name": "交通部觀光署", "group": "central", "lastChecked": "2026-10-12", "found": 2, "note": "台灣好行套票抽獎、重遊臺灣（限外籍旅客）。生日券加碼抽已於 9/9 開獎。" },
+    { "name": "交通部公路局", "group": "central", "lastChecked": "2026-10-12", "found": 1, "note": "機車零違規抽獎（報名已截止，等開獎）。" },
+    { "name": "外交部領事事務局", "group": "central", "lastChecked": "2026-10-12", "found": 1, "note": "出國登錄月月抽。" },
+    { "name": "國防部", "group": "central", "lastChecked": "2026-10-12", "found": 1, "note": "全民國防教育有獎徵答。" },
+    { "name": "運動部", "group": "central", "lastChecked": "2026-10-12", "found": 0, "note": "已查，目前沒有開放中的抽獎。" },
+    { "name": "農業部", "group": "central", "lastChecked": "2026-10-12", "found": 0, "note": "已查，目前沒有找到附官方辦法的抽獎。" },
+    { "name": "環境部", "group": "central", "lastChecked": "2026-10-12", "found": 0, "note": "已查，目前沒有找到附官方辦法的抽獎。" },
+    { "name": "文化部", "group": "central", "lastChecked": "2026-10-12", "found": 0, "note": "已查，目前沒有開放中的抽獎。" },
+    { "name": "經濟部", "group": "central", "lastChecked": "2026-10-12", "found": 0, "note": "只查到商圈協會自辦的活動，不收錄。" },
+    { "name": "衛生福利部", "group": "central", "lastChecked": "2026-10-12", "found": 0, "note": "已查，目前沒有開放中的抽獎。" },
+    { "name": "內政部、數位發展部、勞動部、教育部", "group": "central", "lastChecked": "2026-10-12", "found": 0, "note": "已查，目前沒有開放中的抽獎。" },
+
+    { "name": "臺北市", "group": "metro", "lastChecked": "2026-10-12", "found": 2, "note": "臺北 Stay 住宿抽獎、北投住宿抽機票。「來台北有購嗨」已於 3/8 結束。" },
+    { "name": "新北市", "group": "metro", "lastChecked": "2026-10-12", "found": 0, "note": "有線索：國旅加碼的路線打卡＋500 萬抽獎，但還沒找到官方辦法，暫不上架。" },
+    { "name": "桃園市", "group": "metro", "lastChecked": "2026-10-12", "found": 1, "note": "桃園購物節。另有線索：觀旅局國旅加碼「百萬大獎抽獎」，尚未找到官方辦法。" },
+    { "name": "臺中市", "group": "metro", "lastChecked": "2026-10-12", "found": 1, "note": "臺中購物節（10/24 開跑）。另有線索：觀旅局「週週住臺中」，尚未公布辦法。" },
+    { "name": "臺南市", "group": "metro", "lastChecked": "2026-10-12", "found": 2, "note": "臺南購物節、住宿臺南好康三重送。" },
+    { "name": "高雄市", "group": "metro", "lastChecked": "2026-10-12", "found": 0, "note": "已查，目前沒有市府主辦的抽獎（10 月高雄旅展的抽獎是公會主辦）。" },
+
+    { "name": "基隆市", "group": "county", "lastChecked": "2026-10-12", "found": 0, "note": "已查，目前沒有。" },
+    { "name": "新竹市", "group": "county", "lastChecked": "2026-10-12", "found": 1, "note": "新竹市購物節。" },
+    { "name": "嘉義市", "group": "county", "lastChecked": "2026-10-12", "found": 1, "note": "嘉義市購物節（10/13 登錄截止）。" },
+    { "name": "新竹縣", "group": "county", "lastChecked": "2026-10-12", "found": 0, "note": "已查，國旅加碼為直接送券，不是抽獎。" },
+    { "name": "苗栗縣", "group": "county", "lastChecked": "2026-10-12", "found": 0, "note": "已查，「苗栗幣」是點數回饋，不是抽獎。" },
+    { "name": "彰化縣", "group": "county", "lastChecked": "2026-10-12", "found": 0, "note": "2026 彰化GO購已於 9/8 開獎，已封存。" },
+    { "name": "南投縣", "group": "county", "lastChecked": "2026-10-12", "found": 1, "note": "南投旅遊好康月。" },
+    { "name": "雲林縣", "group": "county", "lastChecked": "2026-10-12", "found": 1, "note": "與神同行遊雲林。" },
+    { "name": "嘉義縣", "group": "county", "lastChecked": "2026-10-12", "found": 0, "note": "有線索：「嘉尚好禮」商圈購物節（10/1–11/30），尚未確認是否為縣府主辦。" },
+    { "name": "屏東縣", "group": "county", "lastChecked": "2026-10-12", "found": 1, "note": "屏東旅遊購GO節。臉書留言抽獎不收錄。" },
+    { "name": "宜蘭縣", "group": "county", "lastChecked": "2026-10-12", "found": 0, "note": "已查，目前沒有。" },
+    { "name": "花蓮縣", "group": "county", "lastChecked": "2026-10-12", "found": 0, "note": "已查，國旅加碼為住宿補助，不是抽獎。" },
+    { "name": "臺東縣", "group": "county", "lastChecked": "2026-10-12", "found": 0, "note": "已查，國旅加碼為住宿補助，不是抽獎。" },
+    { "name": "澎湖縣", "group": "county", "lastChecked": "2026-10-12", "found": 0, "note": "已查，目前沒有。" },
+    { "name": "金門縣", "group": "county", "lastChecked": "2026-10-12", "found": 0, "note": "中秋博餅線上抽已於 9/25 結束。" },
+    { "name": "連江縣", "group": "county", "lastChecked": "2026-10-12", "found": 0, "note": "已查，目前沒有。" }
+  ]
+}

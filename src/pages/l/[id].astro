@@ -1,0 +1,50 @@
+---
+import Base from '../../layouts/Base.astro';
+import Ticket from '../../components/Ticket.astro';
+import data from '../../data/lotteries.json';
+import { CATEGORIES, md, todayTaipei, type Lottery } from '../../lib/status';
+
+export function getStaticPaths() {
+  return (data as Lottery[]).map((item) => ({ params: { id: item.id }, props: { item } }));
+}
+
+const { item } = Astro.props as { item: Lottery };
+const today = todayTaipei();
+const desc = `${item.organizer}主辦，${md(item.startDate)}–${md(item.registerDeadline ?? item.endDate)}。最大獎：${item.topPrize}。${item.eligibility}`;
+---
+<Base title={item.title} description={desc} path={`/l/${item.id}/`}>
+  <p class="back"><a href="/">回到抽獎清單</a></p>
+  <h1 class="visually-hidden">{item.title}</h1>
+  <Ticket item={item} today={today} expanded linkTitle={false} />
+  <p class="note">
+    {CATEGORIES[item.category].label}。頁面顯示的剩餘天數，會依你打開網頁當天的日期重新計算。
+  </p>
+  <script type="application/json" id="lottery-item" set:html={JSON.stringify(item)} />
+</Base>
+
+<script>
+  import { computeStatus, stubText, todayTaipei, urgency, type Lottery } from '../../lib/status';
+  const item: Lottery = JSON.parse(document.getElementById('lottery-item')!.textContent || '{}');
+  const c = computeStatus(item, todayTaipei());
+  const stub = document.querySelector<HTMLElement>('.stub');
+  if (stub && c.status !== 'hidden') {
+    const s = stubText(c, item);
+    stub.dataset.urgency = urgency(c);
+    stub.setAttribute('aria-label', `${s.top}${s.num}${s.unit}，${s.foot}`);
+    stub.querySelector('.stub-top')!.textContent = s.top;
+    const num = stub.querySelector<HTMLElement>('.stub-num')!;
+    num.textContent = s.num;
+    if (/^\d+$/.test(s.num)) num.removeAttribute('data-word'); else num.setAttribute('data-word', '');
+    stub.querySelector('.stub-unit')!.textContent = s.unit;
+    stub.querySelector('.stub-foot')!.textContent = s.foot;
+  } else if (stub) {
+    stub.querySelector('.stub-num')!.textContent = '結束';
+    stub.dataset.urgency = 'muted';
+  }
+</script>
+
+<style>
+  .back { margin: 20px 0 14px; font-size: 0.9375rem; }
+  .back a { color: var(--calm); }
+  .note { margin-top: 14px; font-size: 0.8125rem; color: var(--muted); }
+</style>

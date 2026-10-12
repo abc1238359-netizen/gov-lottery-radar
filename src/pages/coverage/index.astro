@@ -1,0 +1,90 @@
+---
+import Base from '../../layouts/Base.astro';
+import coverage from '../../data/coverage.json';
+import archive from '../../data/archive.json';
+import { md } from '../../lib/status';
+
+const groups = [
+  { key: 'central', title: '中央部會' },
+  { key: 'metro', title: '六都' },
+  { key: 'county', title: '其他 16 縣市' },
+];
+const total = coverage.units.reduce((n, u) => n + u.found, 0);
+---
+<Base title="查證範圍" path="/coverage/" description="這週查了哪些中央部會和縣市政府、各找到幾個抽獎，以及有線索但還沒上架的活動。">
+  <section class="intro">
+    <h1>查證範圍</h1>
+    <p>
+      {md(coverage.lastRun)} 查了中央部會和全部 22 縣市，共上架 {total} 個抽獎。
+      「已查，目前沒有」代表真的找過了；有線索但找不到官方辦法的活動不會上架，會寫在備註裡，下週再追。
+    </p>
+  </section>
+
+  {groups.map((g) => (
+    <section class="block">
+      <h2>{g.title}</h2>
+      <table>
+        <thead>
+          <tr><th scope="col">機關</th><th scope="col" class="n">上架</th><th scope="col">查證日</th><th scope="col">備註</th></tr>
+        </thead>
+        <tbody>
+          {coverage.units.filter((u) => u.group === g.key).map((u) => (
+            <tr class={u.found > 0 ? 'has' : ''}>
+              <th scope="row">{u.name}</th>
+              <td class="n">{u.found}</td>
+              <td class="d">{md(u.lastChecked)}</td>
+              <td class="note">{u.note}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  ))}
+
+  <section class="block">
+    <h2>已封存</h2>
+    <p class="sub">開獎超過 30 天的活動會從清單移除，留在這裡備查。</p>
+    <ul class="archive">
+      {archive.map((a) => (
+        <li>
+          <strong>{a.title}</strong>（{a.organizer}），{md(a.drawDate)} 開獎。
+          <a href={a.winnersUrl} rel="noopener" target="_blank">中獎名單</a>
+        </li>
+      ))}
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .intro h1 { margin: 28px 0 6px; font-size: 1.625rem; }
+  .intro p { margin: 0; color: var(--muted); max-width: 62ch; }
+  .block { margin-top: 32px; }
+  .block h2 { margin: 0 0 10px; font-size: 1rem; color: var(--muted); letter-spacing: 0.04em; }
+  .sub { margin: -4px 0 10px; font-size: 0.875rem; color: var(--muted); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    font-size: 0.875rem;
+  }
+  th, td { text-align: left; padding: 10px 12px; border-top: 1px solid var(--line); vertical-align: top; }
+  thead th { border-top: 0; font-size: 0.75rem; color: var(--muted); font-weight: 500; background: var(--surface-2); }
+  tbody th { font-weight: 500; white-space: nowrap; }
+  .n { text-align: right; font-family: var(--font-num); font-size: 1.0625rem; font-weight: 700; width: 3.5em; }
+  tr.has .n { color: var(--calm); }
+  tr:not(.has) .n { color: var(--muted); }
+  .d { font-family: var(--font-num); font-weight: 600; color: var(--muted); white-space: nowrap; }
+  .note { color: var(--muted); }
+  .archive { margin: 0; padding-left: 1.2em; font-size: 0.9375rem; }
+  .archive a { color: var(--calm); }
+  @media (max-width: 560px) {
+    thead { display: none; }
+    tr { display: grid; grid-template-columns: 1fr auto auto; gap: 2px 10px; padding: 10px 12px; border-top: 1px solid var(--line); }
+    tbody tr:first-child { border-top: 0; }
+    th, td { padding: 0; border: 0; }
+    .note { grid-column: 1 / -1; }
+  }
+</style>

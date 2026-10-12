@@ -1,0 +1,21 @@
+{
+  "name": "gov-lottery-radar",
+  "version": "1.0.0",
+  "description": "公家抽獎雷達：全台政府抽獎整理（非官方）",
+  "scripts": {
+    "validate": "node scripts/validate.mjs",
+    "dev": "astro dev",
+    "build": "node scripts/validate.mjs && astro build",
+    "preview": "astro preview"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "astro": "^5.18.2"
+  },
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  }
+}

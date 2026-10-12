@@ -1,0 +1,142 @@
+---
+import '../styles/global.css';
+import coverage from '../data/coverage.json';
+import { md } from '../lib/status';
+
+interface Props {
+  title?: string;
+  description?: string;
+  path?: string;
+}
+
+const SITE_NAME = '公家抽獎雷達';
+const {
+  title,
+  description = '整理中央部會與 22 縣市政府正在辦的抽獎：還剩幾天截止、誰能參加、最大獎是什麼，每筆都附官方連結。非官方網站。',
+  path = '/',
+} = Astro.props;
+const fullTitle = title ? `${title}｜${SITE_NAME}` : `${SITE_NAME}｜全台政府抽獎整理`;
+const site = Astro.site ?? new URL('https://gov-lottery-radar.vercel.app');
+const canonical = new URL(path, site).toString();
+const ogImage = new URL('/og.png', site).toString();
+---
+<!doctype html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#eef2f1" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0e181b" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="zh_TW" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap"
+    />
+  </head>
+  <body>
+    <header class="site-head">
+      <div class="wrap head-row">
+        <a class="brand" href="/">
+          <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+            <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" stroke-width="2" opacity=".35" />
+            <circle cx="16" cy="16" r="8.5" fill="none" stroke="currentColor" stroke-width="2" opacity=".6" />
+            <path d="M16 16 L16 2 A14 14 0 0 1 29.3 11.7 Z" fill="currentColor" opacity=".9" />
+            <circle cx="22.5" cy="9.5" r="2.2" fill="var(--urgent)" />
+          </svg>
+          <span>{SITE_NAME}</span>
+        </a>
+        <nav class="head-nav" aria-label="主要">
+          <a href="/" aria-current={path === '/' ? 'page' : undefined}>抽獎清單</a>
+          <a href="/coverage/" aria-current={path === '/coverage/' ? 'page' : undefined}>查證範圍</a>
+        </nav>
+      </div>
+      <div class="wrap"><p class="unofficial">非官方網站。資料由民間整理，一律以各機關公告為準。</p></div>
+    </header>
+
+    <main class="wrap">
+      <slot />
+    </main>
+
+    <footer class="site-foot">
+      <div class="wrap">
+        <p>
+          資料最後更新：{md(coverage.lastRun)}（每週一更新）。本站只收有官方來源的活動，「參加」按鈕一律連到官方網址。
+          若頁面資訊和官方公告不同，以官方為準。
+        </p>
+        <p>
+          本站與任何政府機關無關，不會向你索取個資或帳號密碼。看到自稱「政府抽獎」卻要你輸入信用卡或網銀資料的網站，請撥 165 反詐騙專線。
+        </p>
+        <p><a href="/coverage/">查看這週查了哪些機關</a></p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .site-head {
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+  }
+  .head-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 14px;
+    padding-bottom: 6px;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.125rem;
+    letter-spacing: 0.02em;
+    color: var(--calm);
+  }
+  .brand span { color: var(--ink); }
+  .brand-mark { width: 28px; height: 28px; flex: none; }
+  .head-nav { display: flex; gap: 4px; }
+  .head-nav a {
+    font-size: 0.9375rem;
+    text-decoration: none;
+    color: var(--muted);
+    padding: 6px 10px;
+    border-radius: 8px;
+  }
+  .head-nav a[aria-current='page'] {
+    color: var(--ink);
+    background: var(--surface-2);
+    font-weight: 500;
+  }
+  .unofficial {
+    margin: 0;
+    padding-bottom: 12px;
+    font-size: 0.8125rem;
+    color: var(--muted);
+  }
+  .site-foot {
+    margin-top: 56px;
+    padding: 24px 0 40px;
+    border-top: 1px solid var(--line);
+    font-size: 0.8125rem;
+    color: var(--muted);
+  }
+  .site-foot p { margin: 0 0 10px; max-width: 62ch; }
+</style>

@@ -1,0 +1,90 @@
+:root {
+  --bg: #eef2f1;
+  --surface: #ffffff;
+  --surface-2: #f6f8f8;
+  --ink: #17262b;
+  --muted: #5b6b70;
+  --line: #d3dcdb;
+  --urgent: #d9441c;
+  --soon: #c98208;
+  --calm: #1f6f60;
+  --stub-calm: #1f6f60;
+  --stub-muted: #7d8c90;
+
+  --cat-consumption: #2f6fde;
+  --cat-travel: #0e8f7e;
+  --cat-sports: #7a5af8;
+  --cat-culture: #c2417a;
+  --cat-quiz: #8a6a0c;
+  --cat-other: #5b6b70;
+
+  --font-body: 'Noto Sans TC', system-ui, -apple-system, 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+  --font-num: 'Barlow Condensed', 'Noto Sans TC', sans-serif;
+
+  --radius-card: 14px;
+  --radius-chip: 999px;
+  --gutter: 16px;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0e181b;
+    --surface: #152328;
+    --surface-2: #1a2b31;
+    --ink: #e4ecea;
+    --muted: #93a4a7;
+    --line: #27393e;
+    --urgent: #e0532b;
+    --soon: #f0b23a;
+    --calm: #48b29c;
+    --stub-calm: #237a68;
+    --stub-muted: #6f8186;
+
+    --cat-consumption: #6d9cf2;
+    --cat-travel: #3cc2ae;
+    --cat-sports: #a28bff;
+    --cat-culture: #ec6ea4;
+    --cat-quiz: #d4b04a;
+    --cat-other: #93a4a7;
+    color-scheme: dark;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+a { color: inherit; }
+
+:focus-visible {
+  outline: 3px solid var(--cat-consumption);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.wrap {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

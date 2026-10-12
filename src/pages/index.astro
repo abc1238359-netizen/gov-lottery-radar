@@ -1,0 +1,329 @@
+---
+import Base from '../layouts/Base.astro';
+import Ticket from '../components/Ticket.astro';
+import data from '../data/lotteries.json';
+import pinned from '../data/pinned.json';
+import {
+  CATEGORIES, REGIONS, STATUS_ORDER, computeStatus, md, sortKey, todayTaipei,
+  type Category, type Lottery,
+} from '../lib/status';
+
+const items = data as Lottery[];
+const today = todayTaipei();
+
+const withStatus = items
+  .map((item) => ({ item, c: computeStatus(item, today) }))
+  .sort((a, b) =>
+    STATUS_ORDER[a.c.status] - STATUS_ORDER[b.c.status] || sortKey(a.item, a.c) - sortKey(b.item, b.c),
+  );
+
+const groups = {
+  open: withStatus.filter((x) => x.c.status === 'open' || x.c.status === 'upcoming'),
+  awaiting: withStatus.filter((x) => x.c.status === 'awaiting'),
+  drawn: withStatus.filter((x) => x.c.status === 'drawn'),
+};
+const nextUp = groups.open.find((x) => x.c.status === 'open');
+const usedCategories = (Object.keys(CATEGORIES) as Category[]).filter((k) => items.some((i) => i.category === k));
+---
+<Base path="/">
+  <section class="hero" aria-labelledby="hero-title">
+    <h1 id="hero-title" class="hero-title">
+      <span data-summary="count">{groups.open.filter((x) => x.c.status === 'open').length}</span> 個政府抽獎正在開放
+    </h1>
+    <p class="hero-sub" data-summary="next">
+      {nextUp
+        ? <>最快截止的是<a href={`#t-${nextUp.item.id}`}>{nextUp.item.title}</a>，{nextUp.c.days === 0 ? '今天' : `${md(nextUp.c.deadline)}`}截止。</>
+        : '目前沒有開放中的抽獎。'}
+    </p>
+  </section>
+
+  <form class="filters" aria-label="篩選" onsubmit="return false">
+    <label class="field">
+      <span class="field-label">我住在</span>
+      <select id="f-home" name="home">
+        <option value="">不指定</option>
+        {REGIONS.map((r) => <option value={r}>{r}</option>)}
+      </select>
+    </label>
+
+    <fieldset class="seg">
+      <legend class="visually-hidden">主辦單位</legend>
+      <label><input type="radio" name="level" value="" checked /><span>全部</span></label>
+      <label><input type="radio" name="level" value="central" /><span>中央</span></label>
+      <label><input type="radio" name="level" value="local" /><span>地方</span></label>
+    </fieldset>
+
+    <fieldset class="chips">
+      <legend class="visually-hidden">類別</legend>
+      <label><input type="radio" name="cat" value="" checked /><span>全部類別</span></label>
+      {usedCategories.map((k) => (
+        <label style={`--c: var(--cat-${k})`}><input type="radio" name="cat" value={k} /><span>{CATEGORIES[k].label}</span></label>
+      ))}
+    </fieldset>
+
+    <label class="check">
+      <input type="checkbox" id="f-all" />
+      <span>也顯示我可能不符資格的活動（例如限外籍旅客、限設籍）</span>
+    </label>
+  </form>
+
+  <section class="group" data-group="open" aria-labelledby="g-open">
+    <h2 id="g-open">可以參加</h2>
+    <div class="list">
+      {groups.open.map(({ item }) => <Ticket item={item} today={today} />)}
+    </div>
+    <p class="empty" hidden>這個篩選條件下目前沒有可參加的抽獎。換個類別，或把上面的條件改回「全部」看看。</p>
+  </section>
+
+  <section class="group pinned" aria-labelledby="g-pinned">
+    <h2 id="g-pinned">常態抽獎</h2>
+    {pinned.map((p) => (
+      <article class="pin">
+        <div class="pin-head">
+          <h3>{p.title}</h3>
+          <span class="pin-org">{p.organizer}</span>
+        </div>
+        <p>{p.summary}</p>
+        <p class="pin-next">{p.nextDraw}</p>
+        <p class="pin-act"><a class="go" href={p.officialUrl} rel="noopener" target="_blank">查看中獎號碼</a></p>
+      </article>
+    ))}
+  </section>
+
+  <section class="group" data-group="awaiting" aria-labelledby="g-awaiting">
+    <h2 id="g-awaiting">已截止，等開獎</h2>
+    <div class="list">
+      {groups.awaiting.map(({ item }) => <Ticket item={item} today={today} />)}
+    </div>
+    <p class="empty" hidden>目前沒有等開獎的活動。</p>
+  </section>
+
+  <section class="group" data-group="drawn" aria-labelledby="g-drawn">
+    <h2 id="g-drawn">已開獎（開獎後保留 30 天）</h2>
+    <div class="list">
+      {groups.drawn.map(({ item }) => <Ticket item={item} today={today} />)}
+    </div>
+    <p class="empty" hidden>最近 30 天沒有開獎的活動。</p>
+  </section>
+
+  <script type="application/json" id="lottery-data" set:html={JSON.stringify(items)} />
+</Base>
+
+<script>
+  import {
+    computeStatus, maybeIneligible, md, sortKey, stubText, todayTaipei, urgency, STATUS_ORDER,
+    type Lottery,
+  } from '../lib/status';
+
+  const items: Lottery[] = JSON.parse(document.getElementById('lottery-data')!.textContent || '[]');
+  const today = todayTaipei();
+  const HOME_KEY = 'glr-home';
+
+  const form = document.querySelector<HTMLFormElement>('.filters')!;
+  const homeSel = document.getElementById('f-home') as HTMLSelectElement;
+  const showAll = document.getElementById('f-all') as HTMLInputElement;
+
+  try {
+    const saved = localStorage.getItem(HOME_KEY);
+    if (saved) homeSel.value = saved;
+  } catch {}
+
+  const cards = new Map<string, HTMLElement>();
+  document.querySelectorAll<HTMLElement>('.ticket[data-id]').forEach((el) => cards.set(el.dataset.id!, el));
+  const lists = {
+    open: document.querySelector<HTMLElement>('[data-group="open"] .list')!,
+    awaiting: document.querySelector<HTMLElement>('[data-group="awaiting"] .list')!,
+    drawn: document.querySelector<HTMLElement>('[data-group="drawn"] .list')!,
+  };
+
+  // 依今天日期重新計算狀態與票根（網站每週才建置一次，日期要在瀏覽器端算）
+  const computed = items
+    .map((item) => ({ item, c: computeStatus(item, today) }))
+    .sort((a, b) => STATUS_ORDER[a.c.status] - STATUS_ORDER[b.c.status] || sortKey(a.item, a.c) - sortKey(b.item, b.c));
+
+  for (const { item, c } of computed) {
+    const el = cards.get(item.id);
+    if (!el) continue;
+    if (c.status === 'hidden') { el.remove(); continue; }
+    el.dataset.status = c.status;
+    const s = stubText(c, item);
+    const stub = el.querySelector<HTMLElement>('.stub')!;
+    stub.dataset.urgency = urgency(c);
+    stub.setAttribute('aria-label', `${s.top}${s.num}${s.unit}，${s.foot}`);
+    stub.querySelector('.stub-top')!.textContent = s.top;
+    const num = stub.querySelector<HTMLElement>('.stub-num')!;
+    num.textContent = s.num;
+    if (/^\d+$/.test(s.num)) num.removeAttribute('data-word'); else num.setAttribute('data-word', '');
+    stub.querySelector('.stub-unit')!.textContent = s.unit;
+    stub.querySelector('.stub-foot')!.textContent = s.foot;
+    const target = c.status === 'open' || c.status === 'upcoming' ? lists.open : c.status === 'awaiting' ? lists.awaiting : lists.drawn;
+    target.appendChild(el);
+  }
+
+  function apply() {
+    const fd = new FormData(form);
+    const level = String(fd.get('level') || '');
+    const cat = String(fd.get('cat') || '');
+    const home = homeSel.value || null;
+    try { home ? localStorage.setItem(HOME_KEY, home) : localStorage.removeItem(HOME_KEY); } catch {}
+
+    for (const { item, c } of computed) {
+      const el = cards.get(item.id);
+      if (!el || c.status === 'hidden') continue;
+      const hide =
+        (level && item.level !== level) ||
+        (cat && item.category !== cat) ||
+        (!showAll.checked && maybeIneligible(item, home));
+      el.hidden = Boolean(hide);
+    }
+
+    for (const list of Object.values(lists)) {
+      const visible = list.querySelectorAll('.ticket:not([hidden])').length;
+      const empty = list.parentElement!.querySelector<HTMLElement>('.empty');
+      if (empty) empty.hidden = visible > 0;
+    }
+
+    const openNow = computed.filter(({ item, c }) => c.status === 'open' && !cards.get(item.id)?.hidden);
+    document.querySelector('[data-summary="count"]')!.textContent = String(openNow.length);
+    const next = openNow[0];
+    const nextEl = document.querySelector('[data-summary="next"]')!;
+    if (next) {
+      const when = next.c.days === 0 ? '今天' : `${md(next.c.deadline)}，剩 ${next.c.days} 天`;
+      nextEl.innerHTML = '';
+      nextEl.append('最快截止的是');
+      const a = document.createElement('a');
+      a.href = `#t-${next.item.id}`;
+      a.textContent = next.item.title;
+      nextEl.append(a, `，${when}${next.c.days === 0 ? '截止' : ''}。`);
+    } else {
+      nextEl.textContent = '這個篩選條件下目前沒有開放中的抽獎。';
+    }
+  }
+
+  form.addEventListener('change', apply);
+  apply();
+</script>
+
+<style>
+  .hero { padding: 28px 0 8px; }
+  .hero-title {
+    margin: 0;
+    font-size: clamp(1.5rem, 5vw, 2rem);
+    line-height: 1.3;
+    font-weight: 700;
+  }
+  .hero-title span {
+    font-family: var(--font-num);
+    font-size: 1.35em;
+    color: var(--calm);
+    margin-right: 2px;
+  }
+  .hero-sub { margin: 6px 0 0; color: var(--muted); }
+  .hero-sub a { color: var(--ink); font-weight: 500; text-underline-offset: 3px; margin: 0 2px; }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 12px;
+    align-items: center;
+    margin: 16px calc(var(--gutter) * -1) 0;
+    padding: 12px var(--gutter);
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  @media (min-width: 720px) {
+    .filters { position: sticky; top: 0; z-index: 5; }
+  }
+  .field { display: inline-flex; align-items: center; gap: 8px; font-size: 0.875rem; }
+  .field-label { color: var(--muted); }
+  select {
+    font: inherit;
+    font-size: 0.9375rem;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 7px 10px;
+    min-height: 40px;
+  }
+  fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+  .seg, .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .seg { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 3px; gap: 2px; }
+  .seg label, .chips label { position: relative; cursor: pointer; }
+  .seg input, .chips input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+  .seg span {
+    display: block;
+    padding: 5px 12px;
+    border-radius: 7px;
+    font-size: 0.875rem;
+    color: var(--muted);
+  }
+  .seg input:checked + span { background: var(--ink); color: var(--surface); font-weight: 500; }
+  .chips { width: 100%; }
+  .chips span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: var(--radius-chip);
+    border: 1px solid var(--line);
+    background: var(--surface);
+    font-size: 0.875rem;
+    color: var(--ink);
+  }
+  .chips label[style] span::before {
+    content: '';
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--c);
+  }
+  .chips input:checked + span {
+    border-color: var(--c, var(--ink));
+    box-shadow: inset 0 0 0 1px var(--c, var(--ink));
+    font-weight: 500;
+  }
+  .seg input:focus-visible + span, .chips input:focus-visible + span {
+    outline: 3px solid var(--cat-consumption);
+    outline-offset: 2px;
+  }
+  .check { display: flex; gap: 8px; align-items: flex-start; font-size: 0.8125rem; color: var(--muted); cursor: pointer; }
+  .check input { margin-top: 4px; accent-color: var(--calm); }
+
+  .group { margin-top: 32px; }
+  .group h2 {
+    margin: 0 0 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+  .list { display: grid; gap: 14px; }
+  .list:empty { display: none; }
+  .empty {
+    margin: 0;
+    padding: 18px;
+    border: 1px dashed var(--line);
+    border-radius: var(--radius-card);
+    color: var(--muted);
+    font-size: 0.9375rem;
+  }
+
+  .pin {
+    padding: 16px 18px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--cat-consumption);
+    border-radius: var(--radius-card);
+  }
+  .pin-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+  .pin h3 { margin: 0; font-size: 1.0625rem; }
+  .pin-org { font-size: 0.8125rem; color: var(--muted); }
+  .pin p { margin: 6px 0 0; font-size: 0.9375rem; }
+  .pin-next { font-weight: 500; color: var(--cat-consumption); }
+  .pin-act { margin-top: 12px !important; }
+  .pin .go {
+    display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px;
+    border-radius: 10px; background: var(--ink); color: var(--surface);
+    font-weight: 500; text-decoration: none; font-size: 0.9375rem;
+  }
+</style>
